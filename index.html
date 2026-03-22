@@ -1,0 +1,843 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>胡阳 - 个人简历</title>
+    <script src="https://unpkg.com/vue@3/dist/vue.global.js"></script>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+SC:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        * {
+            font-family: 'Noto Sans SC', sans-serif;
+        }
+        
+        :root {
+            --cream-white: #FFFDFB;
+            --baby-blue: #E3F2FD;
+            --mint-green: #E8F5E9;
+            --lavender-purple: #F3E5F5;
+            --apricot: #FFF4E5;
+            --dark-gray: #333333;
+        }
+        
+        body {
+            background-color: var(--cream-white);
+            color: var(--dark-gray);
+        }
+        
+        .gradient-bg {
+            background: linear-gradient(135deg, var(--cream-white) 0%, var(--baby-blue) 25%, var(--mint-green) 50%, var(--lavender-purple) 75%, var(--apricot) 100%);
+        }
+        
+        .card-hover {
+            transition: all 0.3s ease;
+        }
+        
+        .card-hover:hover {
+            transform: translateY(-8px);
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+        }
+        
+        .nav-scroll {
+            backdrop-filter: blur(10px);
+            background-color: rgba(255, 253, 251, 0.95);
+        }
+        
+        .fade-in {
+            animation: fadeIn 0.6s ease-out;
+        }
+        
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+        
+        .page-transition {
+            animation: pageTransition 0.4s ease-out;
+        }
+        
+        @keyframes pageTransition {
+            from {
+                opacity: 0;
+                transform: translateX(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateX(0);
+            }
+        }
+        
+        .section-divider {
+            height: 4px;
+            background: linear-gradient(90deg, var(--baby-blue), var(--mint-green), var(--lavender-purple), var(--apricot));
+            border-radius: 2px;
+        }
+        
+        .btn-primary {
+            background: linear-gradient(135deg, var(--baby-blue) 0%, var(--mint-green) 100%);
+            transition: all 0.3s ease;
+        }
+        
+        .btn-primary:hover {
+            background: linear-gradient(135deg, var(--mint-green) 0%, var(--lavender-purple) 100%);
+            transform: scale(1.05);
+        }
+        
+        .wave-hand {
+            display: inline-block;
+            animation: wave 1.5s ease-in-out infinite;
+            transform-origin: 70% 70%;
+        }
+        
+        @keyframes wave {
+            0%, 60%, 100% {
+                transform: rotate(0deg);
+            }
+            10%, 30% {
+                transform: rotate(14deg);
+            }
+            20% {
+                transform: rotate(-8deg);
+            }
+            40% {
+                transform: rotate(-4deg);
+            }
+            50% {
+                transform: rotate(10deg);
+            }
+        }
+        
+        .bounce-avatar {
+            animation: bounce 2s infinite;
+        }
+        
+        @keyframes bounce {
+            0%, 20%, 50%, 80%, 100% {
+                transform: translateY(0);
+            }
+            40% {
+                transform: translateY(-10px);
+            }
+            60% {
+                transform: translateY(-5px);
+            }
+        }
+        
+        .avatar-container {
+            width: 280px;
+            height: 280px;
+            margin: 0 auto;
+            position: relative;
+        }
+        
+        .copy-clickable {
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+        
+        .copy-clickable:hover {
+            color: #3B82F6;
+            text-decoration: underline;
+        }
+        
+        .toast {
+            position: fixed;
+            top: 100px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: #333;
+            color: white;
+            padding: 12px 24px;
+            border-radius: 8px;
+            z-index: 9999;
+            animation: toastIn 0.3s ease-out;
+        }
+        
+        @keyframes toastIn {
+            from {
+                opacity: 0;
+                transform: translateX(-50%) translateY(-10px);
+            }
+            to {
+                opacity: 1;
+                transform: translateX(-50%) translateY(0);
+            }
+        }
+        
+        .photo-carousel {
+            overflow: hidden;
+            border-radius: 16px;
+        }
+        
+        .photo-track {
+            display: flex;
+            transition: transform 0.5s ease-in-out;
+        }
+        
+        .photo-slide {
+            min-width: 100%;
+            height: 300px;
+            object-fit: cover;
+        }
+        
+        .carousel-dot {
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            background-color: #ddd;
+            transition: background-color 0.3s ease;
+            cursor: pointer;
+        }
+        
+        .carousel-dot.active {
+            background: linear-gradient(135deg, var(--baby-blue), var(--lavender-purple));
+        }
+        
+        .full-height-section {
+            min-height: calc(100vh - 80px);
+        }
+    </style>
+</head>
+<body>
+    <div id="app">
+        <!-- Toast 提示 -->
+        <div v-if="showToast" class="toast">{{ toastMessage }}</div>
+        
+        <!-- 顶部导航栏 -->
+        <nav class="fixed top-0 left-0 right-0 z-50 transition-all duration-300" :class="{'nav-scroll shadow-lg': isScrolled}">
+            <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+                <div class="flex items-center justify-between h-16 md:h-20">
+                    <!-- Slogan -->
+                    <div class="flex-shrink-0 cursor-pointer" @click="currentPage = 'home'">
+                        <span class="text-2xl md:text-3xl font-bold bg-gradient-to-r from-blue-400 via-purple-400 to-pink-400 bg-clip-text text-transparent">HU Yang</span>
+                    </div>
+                    
+                    <!-- 桌面端导航 -->
+                    <div class="hidden md:flex space-x-8">
+                        <a v-for="item in navItems" :key="item.id" @click="navigateTo(item.page)" 
+                           :class="['cursor-pointer transition-colors duration-300 font-medium', 
+                                    currentPage === item.page ? 'text-blue-600' : 'text-gray-700 hover:text-blue-500']">
+                            {{ item.name }}
+                        </a>
+                    </div>
+                    
+                    <!-- 移动端菜单按钮 -->
+                    <button @click="mobileMenuOpen = !mobileMenuOpen" class="md:hidden p-2 rounded-lg hover:bg-gray-100">
+                        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path v-if="!mobileMenuOpen" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"></path>
+                            <path v-else stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+                        </svg>
+                    </button>
+                </div>
+            </div>
+            
+            <!-- 移动端导航菜单 -->
+            <div v-if="mobileMenuOpen" class="md:hidden bg-white border-t">
+                <div class="px-4 py-3 space-y-2">
+                    <a v-for="item in navItems" :key="item.id" @click="navigateTo(item.page); mobileMenuOpen = false;"
+                       :class="['block px-3 py-2 rounded-lg font-medium cursor-pointer',
+                                currentPage === item.page ? 'bg-blue-100 text-blue-700' : 'hover:bg-gray-100']">
+                        {{ item.name }}
+                    </a>
+                </div>
+            </div>
+        </nav>
+
+        <!-- 主内容区域 -->
+        <main class="pt-20 min-h-screen">
+            <!-- 首页 -->
+            <div v-if="currentPage === 'home'" class="page-transition">
+                <section class="py-16 md:py-24 gradient-bg min-h-screen flex items-center">
+                    <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
+                        <div class="fade-in">
+                            <!-- 虚拟形象 - 3D渐变风格女孩儿 -->
+                            <div class="avatar-container mb-8 bounce-avatar">
+                                <svg viewBox="0 0 300 300" class="w-full h-full">
+                                    <defs>
+                                        <!-- 皮肤渐变 -->
+                                        <linearGradient id="skinGradient" x1="0%" y1="0%" x2="0%" y2="100%">
+                                            <stop offset="0%" style="stop-color:#FFE0B2;stop-opacity:1" />
+                                            <stop offset="100%" style="stop-color:#FFCC80;stop-opacity:1" />
+                                        </linearGradient>
+                                        <!-- 头发渐变 -->
+                                        <linearGradient id="hairGradient" x1="0%" y1="0%" x2="0%" y2="100%">
+                                            <stop offset="0%" style="stop-color:#5D4037;stop-opacity:1" />
+                                            <stop offset="100%" style="stop-color:#3E2723;stop-opacity:1" />
+                                        </linearGradient>
+                                        <!-- 学士服渐变 -->
+                                        <linearGradient id="gownGradient" x1="0%" y1="0%" x2="0%" y2="100%">
+                                            <stop offset="0%" style="stop-color:#5C6BC0;stop-opacity:1" />
+                                            <stop offset="100%" style="stop-color:#3949AB;stop-opacity:1" />
+                                        </linearGradient>
+                                        <!-- 学士帽渐变 -->
+                                        <linearGradient id="capGradient" x1="0%" y1="0%" x2="0%" y2="100%">
+                                            <stop offset="0%" style="stop-color:#5C6BC0;stop-opacity:1" />
+                                            <stop offset="100%" style="stop-color:#3949AB;stop-opacity:1" />
+                                        </linearGradient>
+                                        <!-- 垂布渐变 -->
+                                        <linearGradient id="stoleGradient" x1="0%" y1="0%" x2="0%" y2="100%">
+                                            <stop offset="0%" style="stop-color:#F48FB1;stop-opacity:1" />
+                                            <stop offset="100%" style="stop-color:#EC407A;stop-opacity:1" />
+                                        </linearGradient>
+                                        <!-- 流苏渐变 -->
+                                        <linearGradient id="tasselGradient" x1="0%" y1="0%" x2="0%" y2="100%">
+                                            <stop offset="0%" style="stop-color:#FFD700;stop-opacity:1" />
+                                            <stop offset="100%" style="stop-color:#FFA000;stop-opacity:1" />
+                                        </linearGradient>
+                                        <!-- 腮红渐变 -->
+                                        <radialGradient id="blushGradient">
+                                            <stop offset="0%" style="stop-color:#FFCDD2;stop-opacity:0.8" />
+                                            <stop offset="100%" style="stop-color:#FFCDD2;stop-opacity:0" />
+                                        </radialGradient>
+                                    </defs>
+                                    
+                                    <!-- 学士服主体 -->
+                                    <ellipse cx="150" cy="250" rx="95" ry="50" fill="url(#gownGradient)"/>
+                                    <!-- 学士服领子 -->
+                                    <path d="M85 215 Q150 195 215 215 L225 280 L75 280 Z" fill="url(#gownGradient)"/>
+                                    <!-- 学士服V领 -->
+                                    <path d="M100 220 Q150 205 200 220 L180 280 L120 280 Z" fill="#3949AB"/>
+                                    <!-- 垂布 - 粉色 -->
+                                    <path d="M115 225 Q150 215 185 225 L175 275 Q150 265 125 275 Z" fill="url(#stoleGradient)"/>
+                                    
+                                    <!-- 头发 - 主体 -->
+                                    <ellipse cx="150" cy="118" rx="98" ry="92" fill="url(#hairGradient)"/>
+                                    <!-- 头发两侧 -->
+                                    <ellipse cx="58" cy="178" rx="38" ry="72" fill="url(#hairGradient)"/>
+                                    <ellipse cx="242" cy="178" rx="38" ry="72" fill="url(#hairGradient)"/>
+                                    <!-- 头发刘海 -->
+                                    <ellipse cx="150" cy="98" rx="85" ry="35" fill="url(#hairGradient)"/>
+                                    
+                                    <!-- 脸 -->
+                                    <ellipse cx="150" cy="148" rx="75" ry="82" fill="url(#skinGradient)"/>
+                                    <!-- 耳朵 -->
+                                    <ellipse cx="72" cy="148" rx="12" ry="18" fill="url(#skinGradient)"/>
+                                    <ellipse cx="228" cy="148" rx="12" ry="18" fill="url(#skinGradient)"/>
+                                    
+                                    <!-- 学士帽底部 -->
+                                    <ellipse cx="150" cy="78" rx="72" ry="14" fill="url(#capGradient)"/>
+                                    <!-- 学士帽主体 -->
+                                    <rect x="93" y="32" width="114" height="46" rx="2" fill="url(#capGradient)"/>
+                                    <!-- 学士帽顶部 -->
+                                    <path d="M88 47 L150 12 L212 47 Z" fill="#5C6BC0"/>
+                                    <!-- 流苏线 -->
+                                    <line x1="150" y1="12" x2="150" y2="28" stroke="url(#tasselGradient)" stroke-width="3"/>
+                                    <!-- 流苏顶部装饰 -->
+                                    <circle cx="150" cy="12" r="5" fill="url(#tasselGradient)"/>
+                                    <!-- 流苏 -->
+                                    <path d="M150 28 Q155 38 Q150 48 Q145 58 L148 63 Q152 61 Q155 53 Q152 43 Q150 33" stroke="url(#tasselGradient)" stroke-width="4" fill="none"/>
+                                    <!-- 流苏底部装饰 -->
+                                    <ellipse cx="150" cy="63" rx="8" ry="5" fill="url(#tasselGradient)"/>
+                                    
+                                    <!-- 眼睛 - 眼白 -->
+                                    <ellipse cx="118" cy="142" rx="13" ry="15" fill="white"/>
+                                    <ellipse cx="182" cy="142" rx="13" ry="15" fill="white"/>
+                                    <!-- 眼睛 - 虹膜 -->
+                                    <ellipse cx="118" cy="144" rx="9" ry="11" fill="#7B1FA2"/>
+                                    <ellipse cx="182" cy="144" rx="9" ry="11" fill="#7B1FA2"/>
+                                    <!-- 眼睛 - 瞳孔 -->
+                                    <ellipse cx="118" cy="145" rx="5" ry="6" fill="#1a1a1a"/>
+                                    <ellipse cx="182" cy="145" rx="5" ry="6" fill="#1a1a1a"/>
+                                    <!-- 眼睛 - 高光 -->
+                                    <circle cx="115" cy="141" r="3.5" fill="white"/>
+                                    <circle cx="179" cy="141" r="3.5" fill="white"/>
+                                    <circle cx="120" cy="147" r="1.8" fill="white"/>
+                                    <circle cx="184" cy="147" r="1.8" fill="white"/>
+                                    <!-- 眉毛 -->
+                                    <path d="M102 118 Q118 110 134 118" stroke="#3E2723" stroke-width="3" fill="none" stroke-linecap="round"/>
+                                    <path d="M166 118 Q182 110 198 118" stroke="#3E2723" stroke-width="3" fill="none" stroke-linecap="round"/>
+                                    <!-- 鼻子 -->
+                                    <ellipse cx="150" cy="168" rx="6" ry="4" fill="#FFCC80"/>
+                                    <!-- 嘴巴 - 微笑 -->
+                                    <path d="M128 192 Q150 212 172 192" stroke="#E91E63" stroke-width="3.5" fill="none" stroke-linecap="round"/>
+                                    <path d="M133 195 Q150 204 167 195" fill="#F8BBD9"/>
+                                    <!-- 腮红 -->
+                                    <ellipse cx="98" cy="175" rx="22" ry="15" fill="url(#blushGradient)"/>
+                                    <ellipse cx="202" cy="175" rx="22" ry="15" fill="url(#blushGradient)"/>
+                                    <!-- 面部高光 -->
+                                    <ellipse cx="118" cy="132" rx="12" ry="7" fill="white" opacity="0.4"/>
+                                    <ellipse cx="182" cy="132" rx="12" ry="7" fill="white" opacity="0.4"/>
+                                    <ellipse cx="150" cy="125" rx="18" ry="10" fill="white" opacity="0.25"/>
+                                </svg>
+                            </div>
+                            
+                            <!-- 挥手和Hi -->
+                            <div class="mb-6">
+                                <span class="text-6xl md:text-8xl wave-hand">👋</span>
+                                <h1 class="text-5xl md:text-7xl font-bold mt-4 bg-gradient-to-r from-blue-500 via-purple-500 to-pink-500 bg-clip-text text-transparent">
+                                    Hi~
+                                </h1>
+                            </div>
+                            
+                            <h2 class="text-3xl md:text-5xl font-bold mb-6 text-gray-800">我是胡阳</h2>
+                            
+                            <p class="text-xl md:text-2xl text-gray-700 mb-8 max-w-2xl mx-auto leading-relaxed">
+                                山东大学管理学院硕士研究生<br>
+                                致力于旅游疗愈、康养旅游等文旅行业<br>
+                                学术研究与实践创新
+                            </p>
+                            
+                            <div class="flex flex-wrap justify-center gap-4">
+                                <button @click="navigateTo('profile')" class="btn-primary px-8 py-4 rounded-full text-lg font-semibold text-gray-800 shadow-lg">
+                                    了解更多 →
+                                </button>
+                                <button @click="navigateTo('contact')" class="bg-white px-8 py-4 rounded-full text-lg font-semibold text-gray-800 shadow-lg hover:shadow-xl transition-all duration-300">
+                                    联系我 📧
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+            </div>
+
+            <!-- 个人简介 -->
+            <div v-else-if="currentPage === 'profile'" class="page-transition">
+                <section class="py-16 md:py-20">
+                    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+                        <div class="text-center mb-12">
+                            <h2 class="text-3xl md:text-4xl font-bold mb-4 text-gray-800">个人简介</h2>
+                            <div class="section-divider w-32 mx-auto"></div>
+                        </div>
+                        
+                        <div class="grid lg:grid-cols-2 gap-12 items-start">
+                            <!-- 照片轮播 -->
+                            <div class="observe-element">
+                                <h3 class="text-xl font-bold text-gray-800 mb-4 text-center">我的风采</h3>
+                                <div class="photo-carousel bg-gray-100 rounded-2xl shadow-lg">
+                                    <div class="photo-track" :style="{ transform: 'translateX(-' + (currentPhotoIndex * 100) + '%)' }">
+                                        <div v-for="(photo, index) in photos" :key="index" class="photo-slide flex items-center justify-center bg-gray-100">
+                                            <img :src="photo.src" :alt="photo.alt" class="w-full h-full object-cover rounded-2xl" 
+                                                 @error="handleImageError(photo, index)">
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="flex justify-center gap-3 mt-4">
+                                    <button v-for="(photo, index) in photos" :key="index" 
+                                            @click="currentPhotoIndex = index"
+                                            :class="['carousel-dot', { active: currentPhotoIndex === index }]">
+                                    </button>
+                                </div>
+                                <div class="flex justify-center gap-4 mt-4">
+                                    <button @click="prevPhoto" class="px-4 py-2 bg-gray-200 rounded-lg hover:bg-gray-300 transition-colors">
+                                        ← 上一张
+                                    </button>
+                                    <button @click="nextPhoto" class="px-4 py-2 bg-gray-200 rounded-lg hover:bg-gray-300 transition-colors">
+                                        下一张 →
+                                    </button>
+                                </div>
+                            </div>
+                            
+                            <!-- 个人信息 -->
+                            <div class="observe-element">
+                                <div class="bg-white rounded-2xl p-8 shadow-lg border border-gray-100">
+                                    <h3 class="text-2xl font-bold text-gray-800 mb-6">基本信息</h3>
+                                    
+                                    <div class="space-y-4">
+                                        <div class="flex items-center gap-4">
+                                            <div class="w-12 h-12 rounded-full bg-gradient-to-br from-blue-100 to-blue-200 flex items-center justify-center text-2xl">
+                                                👤
+                                            </div>
+                                            <div>
+                                                <p class="text-gray-500 text-sm">姓名</p>
+                                                <p class="text-lg font-semibold text-gray-800">胡阳</p>
+                                            </div>
+                                        </div>
+                                        
+                                        <div class="flex items-center gap-4">
+                                            <div class="w-12 h-12 rounded-full bg-gradient-to-br from-green-100 to-green-200 flex items-center justify-center text-2xl">
+                                                📧
+                                            </div>
+                                            <div>
+                                                <p class="text-gray-500 text-sm">邮箱 <span class="text-xs text-gray-400">(点击复制)</span></p>
+                                                <p class="text-lg font-semibold text-gray-800 copy-clickable" @click="copyToClipboard('huyanghoo@163.com')">huyanghoo@163.com</p>
+                                            </div>
+                                        </div>
+                                        
+                                        <div class="flex items-center gap-4">
+                                            <div class="w-12 h-12 rounded-full bg-gradient-to-br from-purple-100 to-purple-200 flex items-center justify-center text-2xl">
+                                                📱
+                                            </div>
+                                            <div>
+                                                <p class="text-gray-500 text-sm">手机 <span class="text-xs text-gray-400">(点击复制)</span></p>
+                                                <p class="text-lg font-semibold text-gray-800 copy-clickable" @click="copyToClipboard('13946256694')">13946256694</p>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    
+                                    <div class="mt-8">
+                                        <h4 class="text-lg font-bold text-gray-800 mb-3">个人简介</h4>
+                                        <p class="text-gray-700 leading-relaxed bg-gradient-to-br from-blue-50 to-green-50 rounded-xl p-6">
+                                            山东大学管理学院硕士研究生，致力于旅游疗愈、康养旅游等文旅行业学术研究与实践创新，具备数据分析能力与项目实践经验。
+                                        </p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+            </div>
+
+            <!-- 教育背景 -->
+            <div v-else-if="currentPage === 'education'" class="page-transition">
+                <section class="py-16 md:py-20">
+                    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+                        <div class="text-center mb-12">
+                            <h2 class="text-3xl md:text-4xl font-bold mb-4 text-gray-800">教育背景</h2>
+                            <div class="section-divider w-32 mx-auto"></div>
+                        </div>
+                        <div class="grid md:grid-cols-2 gap-8">
+                            <div v-for="edu in education" :key="edu.id" class="card-hover bg-white rounded-2xl p-8 shadow-lg border border-gray-100">
+                                <div class="flex items-start justify-between mb-4">
+                                    <div>
+                                        <h3 class="text-xl font-bold text-gray-800 mb-2">{{ edu.university }}</h3>
+                                        <p class="text-blue-600 font-semibold">{{ edu.major }}</p>
+                                    </div>
+                                    <span class="bg-gradient-to-r from-blue-100 to-purple-100 text-blue-700 px-4 py-2 rounded-full text-sm font-medium">{{ edu.duration }}</span>
+                                </div>
+                                <p class="text-gray-600">{{ edu.degree }}</p>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+            </div>
+
+            <!-- 科研成果 -->
+            <div v-else-if="currentPage === 'publications'" class="page-transition">
+                <section class="py-16 md:py-20 bg-gradient-to-br from-blue-50 to-green-50">
+                    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+                        <div class="text-center mb-12">
+                            <h2 class="text-3xl md:text-4xl font-bold mb-4 text-gray-800">科研成果</h2>
+                            <div class="section-divider w-32 mx-auto"></div>
+                        </div>
+                        <div class="space-y-6">
+                            <div v-for="pub in publications" :key="pub.id" class="card-hover bg-white rounded-2xl p-6 md:p-8 shadow-lg border border-gray-100">
+                                <div class="flex flex-col md:flex-row md:items-start md:justify-between gap-4">
+                                    <div class="flex-1">
+                                        <div class="flex items-center gap-3 mb-3">
+                                            <span class="bg-gradient-to-r from-green-100 to-blue-100 text-green-700 px-3 py-1 rounded-full text-xs font-semibold">{{ pub.date }}</span>
+                                        </div>
+                                        <a v-if="pub.link" :href="pub.link" target="_blank" rel="noopener noreferrer"
+                                           class="text-xl font-bold text-gray-800 hover:text-blue-600 transition-colors inline-flex items-center gap-2">
+                                            {{ pub.title }}
+                                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"></path>
+                                            </svg>
+                                        </a>
+                                        <h3 v-else class="text-xl font-bold text-gray-800">{{ pub.title }}</h3>
+                                        <p class="text-gray-600 mt-3">{{ pub.journal }}</p>
+                                    </div>
+                                    <span v-if="pub.journalTag" class="bg-gradient-to-r from-purple-100 to-pink-100 text-purple-700 px-4 py-2 rounded-lg text-sm font-medium whitespace-nowrap">{{ pub.journalTag }}</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+            </div>
+
+            <!-- 项目经历 -->
+            <div v-else-if="currentPage === 'projects'" class="page-transition">
+                <section class="py-16 md:py-20">
+                    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+                        <div class="text-center mb-12">
+                            <h2 class="text-3xl md:text-4xl font-bold mb-4 text-gray-800">项目经历</h2>
+                            <div class="section-divider w-32 mx-auto"></div>
+                        </div>
+                        <div class="space-y-8">
+                            <div v-for="project in projects" :key="project.id" class="card-hover bg-gradient-to-r from-white to-blue-50 rounded-2xl p-8 shadow-lg border border-gray-100">
+                                <div class="flex items-center gap-3 mb-4">
+                                    <span class="bg-gradient-to-r from-blue-400 to-purple-400 text-white px-4 py-2 rounded-full text-sm font-medium">{{ project.date }}</span>
+                                    <span class="text-gray-500 font-medium">{{ project.type }}</span>
+                                </div>
+                                <h3 class="text-xl md:text-2xl font-bold text-gray-800 mb-4">{{ project.title }}</h3>
+                                <p class="text-gray-600 leading-relaxed">{{ project.description }}</p>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+            </div>
+
+            <!-- 技能证书 -->
+            <div v-else-if="currentPage === 'skills'" class="page-transition">
+                <section class="py-16 md:py-20 bg-gradient-to-br from-green-50 to-purple-50 full-height-section">
+                    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+                        <div class="text-center mb-12">
+                            <h2 class="text-3xl md:text-4xl font-bold mb-4 text-gray-800">技能证书</h2>
+                            <div class="section-divider w-32 mx-auto"></div>
+                        </div>
+                        <div class="grid md:grid-cols-2 lg:grid-cols-4 gap-6">
+                            <div v-for="skill in skills" :key="skill.id" class="card-hover bg-white rounded-2xl p-6 shadow-lg border border-gray-100">
+                                <div class="text-center">
+                                    <div class="w-16 h-16 mx-auto mb-4 rounded-full bg-gradient-to-br from-blue-100 to-purple-100 flex items-center justify-center">
+                                        <span class="text-3xl">{{ skill.icon }}</span>
+                                    </div>
+                                    <h3 class="text-lg font-bold text-gray-800 mb-3">{{ skill.category }}</h3>
+                                    <ul class="text-gray-600 text-sm space-y-1">
+                                        <li v-for="(item, index) in skill.items" :key="index">{{ item }}</li>
+                                    </ul>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+            </div>
+
+            <!-- 荣誉奖励 -->
+            <div v-else-if="currentPage === 'awards'" class="page-transition">
+                <section class="py-16 md:py-20">
+                    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+                        <div class="text-center mb-12">
+                            <h2 class="text-3xl md:text-4xl font-bold mb-4 text-gray-800">荣誉奖励</h2>
+                            <div class="section-divider w-32 mx-auto"></div>
+                        </div>
+                        <div class="max-w-3xl mx-auto">
+                            <div v-for="award in awards" :key="award.id" class="card-hover bg-gradient-to-r from-yellow-50 to-orange-50 rounded-2xl p-6 mb-4 shadow-lg border border-gray-100">
+                                <div class="flex items-center gap-4">
+                                    <div class="w-12 h-12 rounded-full bg-gradient-to-br from-yellow-400 to-orange-400 flex items-center justify-center text-white text-xl">
+                                        🏆
+                                    </div>
+                                    <div>
+                                        <h3 class="text-lg font-bold text-gray-800">{{ award.title }}</h3>
+                                        <p class="text-gray-600">{{ award.description }}</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+            </div>
+
+            <!-- 联系我 -->
+            <div v-else-if="currentPage === 'contact'" class="page-transition">
+                <section class="py-16 md:py-20 gradient-bg full-height-section">
+                    <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
+                        <div class="text-center mb-12">
+                            <h2 class="text-3xl md:text-4xl font-bold mb-4 text-gray-800">联系我</h2>
+                            <div class="section-divider w-32 mx-auto mb-6"></div>
+                            <p class="text-gray-600 text-lg">期待与您的交流与合作</p>
+                        </div>
+                        <div class="grid md:grid-cols-2 gap-8">
+                            <div class="card-hover bg-white rounded-2xl p-8 shadow-lg text-center">
+                                <div class="w-20 h-20 mx-auto mb-6 rounded-full bg-gradient-to-br from-blue-400 to-blue-500 flex items-center justify-center text-white text-4xl">
+                                    📧
+                                </div>
+                                <h3 class="text-xl font-bold text-gray-800 mb-2">电子邮箱</h3>
+                                <p class="text-gray-600 text-lg copy-clickable" @click="copyToClipboard('huyanghoo@163.com')">huyanghoo@163.com</p>
+                                <p class="text-xs text-gray-400 mt-2">点击复制</p>
+                            </div>
+                            <div class="card-hover bg-white rounded-2xl p-8 shadow-lg text-center">
+                                <div class="w-20 h-20 mx-auto mb-6 rounded-full bg-gradient-to-br from-green-400 to-green-500 flex items-center justify-center text-white text-4xl">
+                                    📱
+                                </div>
+                                <h3 class="text-xl font-bold text-gray-800 mb-2">联系电话</h3>
+                                <p class="text-gray-600 text-lg copy-clickable" @click="copyToClipboard('13946256694')">13946256694</p>
+                                <p class="text-xs text-gray-400 mt-2">点击复制</p>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+            </div>
+        </main>
+
+        <!-- 底部 -->
+        <footer class="bg-gray-900 text-white py-12">
+            <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+                <div class="text-center">
+                    <h3 class="text-2xl font-bold mb-4">胡阳的个人简历网站</h3>
+                    <p class="text-gray-400 text-lg mb-6">逐光而行・研思致远</p>
+                    <div class="flex flex-wrap justify-center gap-6 mb-8">
+                        <a @click="navigateTo('home')" class="text-gray-400 hover:text-white transition-colors cursor-pointer">首页</a>
+                        <a @click="navigateTo('education')" class="text-gray-400 hover:text-white transition-colors cursor-pointer">教育背景</a>
+                        <a @click="navigateTo('publications')" class="text-gray-400 hover:text-white transition-colors cursor-pointer">科研成果</a>
+                        <a @click="navigateTo('projects')" class="text-gray-400 hover:text-white transition-colors cursor-pointer">项目经历</a>
+                        <a @click="navigateTo('skills')" class="text-gray-400 hover:text-white transition-colors cursor-pointer">技能证书</a>
+                        <a @click="navigateTo('awards')" class="text-gray-400 hover:text-white transition-colors cursor-pointer">荣誉奖励</a>
+                        <a @click="navigateTo('contact')" class="text-gray-400 hover:text-white transition-colors cursor-pointer">联系我</a>
+                    </div>
+                    <div class="pt-6 border-t border-gray-800">
+                        <p class="text-gray-500">&copy; 2025 胡阳. All rights reserved.</p>
+                    </div>
+                </div>
+            </div>
+        </footer>
+
+        <!-- 回到首页按钮 -->
+        <button v-if="currentPage !== 'home'" @click="navigateTo('home')"
+                class="fixed bottom-8 right-8 w-12 h-12 bg-gradient-to-r from-blue-500 to-purple-500 text-white rounded-full shadow-lg hover:shadow-xl transition-all duration-300 z-40 flex items-center justify-center">
+            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"></path>
+            </svg>
+        </button>
+    </div>
+
+    <script>
+        const { createApp, ref, onMounted, onUnmounted } = Vue;
+
+        createApp({
+            setup() {
+                const isScrolled = ref(false);
+                const mobileMenuOpen = ref(false);
+                const currentPage = ref('home');
+                const currentPhotoIndex = ref(0);
+                const showToast = ref(false);
+                const toastMessage = ref('');
+                let photoInterval = null;
+                let toastTimeout = null;
+
+                const navItems = [
+                    { id: 1, name: '首页', page: 'home' },
+                    { id: 2, name: '个人简介', page: 'profile' },
+                    { id: 3, name: '教育背景', page: 'education' },
+                    { id: 4, name: '科研成果', page: 'publications' },
+                    { id: 5, name: '项目经历', page: 'projects' },
+                    { id: 6, name: '技能证书', page: 'skills' },
+                    { id: 7, name: '荣誉奖励', page: 'awards' },
+                    { id: 8, name: '联系我', page: 'contact' }
+                ];
+
+                const photos = [
+                    { src: 'images/photo1.jpg', alt: '博物馆参观' },
+                    { src: 'images/photo2.jpg', alt: '竹林漫步' },
+                    { src: 'images/photo3.jpg', alt: '长白山旅行' },
+                    { src: 'images/photo4.jpg', alt: '自拍时刻' },
+                    { src: 'images/photo5.jpg', alt: '剪影艺术' }
+                ];
+
+                const education = [
+                    { id: 1, university: '山东大学', major: '旅游管理', degree: '硕士研究生', duration: '2025.09-2028.06' },
+                    { id: 2, university: '山东大学', major: '工商管理', degree: '本科', duration: '2021.09-2025.06' }
+                ];
+
+                const publications = [
+                    { id: 1, date: '2025.06', title: 'The Impact of Government Intervention in Rural Tourism Development on Residents\' Income: A Quasi-Natural Experiment from China', journal: 'SCI JCR Q1 期刊《Agriculture》', journalTag: 'SCI Q1', link: 'https://www.mdpi.com/2077-0472/15/12/1269' },
+                    { id: 2, date: '2025.12', title: 'Development and validation of the travel intensity scale: the non-linear interplay with restorative effects', journal: 'SSCI JCR Q1 期刊《Current Issues in Tourism》', journalTag: 'SSCI Q1', link: 'https://doi.org/10.1080/13683500.2025.2605080' },
+                    { id: 3, date: '2023.08-2023.10', title: 'AI 虚拟导游：超越传统导游的体验、情感与行为', journal: '入选 2023《旅游学刊》中国旅游年会 "数字文旅创新" 议题', journalTag: '会议论文' },
+                    { id: 4, date: '2025.10', title: '参与《旅游学刊》中国旅游研究年会', journal: '', journalTag: '学术活动' }
+                ];
+
+                const projects = [
+                    { id: 1, date: '2024.07', type: '国家自然科学基金项目', title: '恢复性环境理论下老年康养旅游者的身心健康：测度模型、作用机理与适老化策略', description: '成员，负责老年旅游者身心健康测量、作用机理验证与适老化策略提出' },
+                    { id: 2, date: '2024.07', type: '横向课题', title: '潍坊市中国式现代化农业品牌创新发展及传播研究', description: '成员，挖掘潍坊农业品牌模式，提炼全国可复制推广经验' }
+                ];
+
+                const skills = [
+                    { id: 1, category: '英语水平', icon: '🌍', items: ['CET-4', 'CET-6'] },
+                    { id: 2, category: '办公技能', icon: '💻', items: ['Microsoft Office Suite', 'Word/Excel/PowerPoint'] },
+                    { id: 3, category: '数据分析', icon: '📊', items: ['ArcGIS', 'GeoDa', 'Credamo', '八爪鱼', 'SPSS', 'Stata'] },
+                    { id: 4, category: '学术工具', icon: '📚', items: ['NVivo', 'Zotero', 'Endnote'] }
+                ];
+
+                const awards = [
+                    { id: 1, title: '山东大学学业奖学金', description: '2023-2025 连续三年获得' },
+                    { id: 2, title: '广播体操比赛一等奖', description: '山东大学管理学院' }
+                ];
+
+                const navigateTo = (page) => {
+                    currentPage.value = page;
+                    window.scrollTo({ top: 0, behavior: 'smooth' });
+                };
+
+                const nextPhoto = () => {
+                    currentPhotoIndex.value = (currentPhotoIndex.value + 1) % photos.length;
+                };
+
+                const prevPhoto = () => {
+                    currentPhotoIndex.value = (currentPhotoIndex.value - 1 + photos.length) % photos.length;
+                };
+
+                const handleScroll = () => {
+                    isScrolled.value = window.scrollY > 50;
+                };
+
+                const startPhotoCarousel = () => {
+                    photoInterval = setInterval(() => {
+                        nextPhoto();
+                    }, 3000);
+                };
+
+                const stopPhotoCarousel = () => {
+                    if (photoInterval) {
+                        clearInterval(photoInterval);
+                    }
+                };
+
+                const handleImageError = (photo, index) => {
+                    const fallbackImages = [
+                        'https://trae-api-cn.mchost.guru/api/ide/v1/text_to_image?prompt=beautiful%20girl%20in%20museum%20elegant%20portrait&image_size=square_hd',
+                        'https://trae-api-cn.mchost.guru/api/ide/v1/text_to_image?prompt=girl%20in%20bamboo%20forest%20peaceful&image_size=square_hd',
+                        'https://trae-api-cn.mchost.guru/api/ide/v1/text_to_image?prompt=girl%20at%20mountain%20travel%20adventure&image_size=square_hd',
+                        'https://trae-api-cn.mchost.guru/api/ide/v1/text_to_image?prompt=girl%20taking%20selfie%20happy%20moment&image_size=square_hd',
+                        'https://trae-api-cn.mchost.guru/api/ide/v1/text_to_image?prompt=silhouette%20portrait%20artistic%20girl&image_size=square_hd'
+                    ];
+                    photo.src = fallbackImages[index] || fallbackImages[0];
+                };
+
+                const copyToClipboard = (text) => {
+                    navigator.clipboard.writeText(text).then(() => {
+                        showToastMessage('已复制到剪贴板！');
+                    }).catch(() => {
+                        const textarea = document.createElement('textarea');
+                        textarea.value = text;
+                        document.body.appendChild(textarea);
+                        textarea.select();
+                        document.execCommand('copy');
+                        document.body.removeChild(textarea);
+                        showToastMessage('已复制到剪贴板！');
+                    });
+                };
+
+                const showToastMessage = (message) => {
+                    if (toastTimeout) {
+                        clearTimeout(toastTimeout);
+                    }
+                    toastMessage.value = message;
+                    showToast.value = true;
+                    toastTimeout = setTimeout(() => {
+                        showToast.value = false;
+                    }, 2000);
+                };
+
+                onMounted(() => {
+                    window.addEventListener('scroll', handleScroll);
+                    startPhotoCarousel();
+                });
+
+                onUnmounted(() => {
+                    window.removeEventListener('scroll', handleScroll);
+                    stopPhotoCarousel();
+                    if (toastTimeout) {
+                        clearTimeout(toastTimeout);
+                    }
+                });
+
+                return {
+                    isScrolled,
+                    mobileMenuOpen,
+                    currentPage,
+                    currentPhotoIndex,
+                    showToast,
+                    toastMessage,
+                    navItems,
+                    photos,
+                    education,
+                    publications,
+                    projects,
+                    skills,
+                    awards,
+                    navigateTo,
+                    nextPhoto,
+                    prevPhoto,
+                    copyToClipboard,
+                    handleImageError
+                };
+            }
+        }).mount('#app');
+    </script>
+</body>
+</html>
